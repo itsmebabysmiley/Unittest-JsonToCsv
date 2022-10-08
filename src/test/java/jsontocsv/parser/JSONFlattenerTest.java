@@ -1,6 +1,7 @@
 package jsontocsv.parser;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 
@@ -10,6 +11,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,16 +87,59 @@ public class JSONFlattenerTest {
 
     @Test
     public void testParseURIJsonWithEncoder() throws URISyntaxException {
+
         List<Map<String, String>> actualJson = JSONFlattener.parseJson(
-                new URI("http://google.com/"),"UTF-8");
-        assertThat(actualJson).isNull();
-        actualJson = JSONFlattener.parseJson(
                 new URI("http://echo.jsontest.com/name/Nopparat/?"),"UTF-8");
         String expectJson = "[{name=Nopparat}]";
         assertThat(actualJson.toString()).isEqualTo(expectJson);
         actualJson = JSONFlattener.parseJson(
                 new URI("http://echo.jsontest.com/"),"UTF-8");
         expectJson = "[{=}]";
+        assertThat(actualJson.toString()).isEqualTo(expectJson);
+        actualJson = JSONFlattener.parseJson(
+                new URI("http://google.com/"),"UTF-8");
+        assertThat(actualJson).isNull();
+        actualJson = JSONFlattener.parseJson(
+                new URI("http://facebook.com/"),"UTF-8");
+        assertThat(actualJson).isNull();
+        actualJson = JSONFlattener.parseJson(
+                new URI("http://gmail.com/"),"UTF-8");
+        assertThat(actualJson).isNull();
+    }
+
+    @Test
+    public void testParseJsonObject(){
+        JSONObject jsonNullObj = null;
+        assertThatThrownBy(()-> JSONFlattener.parse(jsonNullObj)).isInstanceOf(NullPointerException.class);
+
+        JSONObject jsonObj = new JSONObject();
+        Map<String, String> actualJson = JSONFlattener.parse(jsonObj);
+        String expectJson = "{}";
+        assertThat(actualJson.toString()).isEqualTo(expectJson);
+
+        jsonObj.put("name","Nopparat");
+        actualJson = JSONFlattener.parse(jsonObj);
+        expectJson = "{name=Nopparat}";
+        assertThat(actualJson.toString()).isEqualTo(expectJson);
+
+    }
+
+    @Test
+    public void testParseJsonArray(){
+        JSONArray jsonArray = new JSONArray();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name","Nopparat");
+        jsonArray.put(jsonObject);
+        List<Map<String, String>> actualJson = JSONFlattener.parse(jsonArray);
+        String expectJson = "[{name=Nopparat}]";
+        assertThat(actualJson.toString()).isEqualTo(expectJson);
+
+        JSONArray jsonArrayNull = null;
+        assertThatThrownBy(()-> JSONFlattener.parse(jsonArrayNull)).isInstanceOf(NullPointerException.class);
+
+        JSONArray jsonArrayEmpty = new JSONArray();
+        actualJson = JSONFlattener.parse(jsonArrayEmpty);
+        expectJson = "[]";
         assertThat(actualJson.toString()).isEqualTo(expectJson);
     }
 }

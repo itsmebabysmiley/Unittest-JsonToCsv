@@ -56,7 +56,7 @@ public class Main {
         // Using ';' as separator
         Set<String> header = CSVWriter.collectOrderedHeaders(flatJson);
         // the intention is generate a csv file with specific headers - not all
-        CSVWriter.writeLargeFile(flatJson, ";", "files/sample_largeFile.csv", header);  
+        CSVWriter.writeLargeFile(flatJson, ";", "files/sample_largeFile.csv", header);
     }
 
     private static String jsonString() {
